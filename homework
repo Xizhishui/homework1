@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <string.h>
+
+// 定义管理员密码
+#define ADMIN_PASSWORD "admin123"
+
+// 定义最大用户数
+#define MAX_USERS 10
+
+// 用户结构体
+typedef struct {
+    char name[20];
+    char password[20];
+    int access_level; // 0: 访客，1: 员工，2: 管理员
+} User;
+
+// 用户数组
+User users[MAX_USERS];
+
+// 当前用户数
+int num_users = 0;
+
+// 添加新用户
+void add_user(char *name, char *password, int access_level) {
+    // 检查用户数量是否超出最大值
+    if (num_users >= MAX_USERS) {
+        printf("用户数量已达到最大值，无法添加新用户！\n");
+        return;
+    }
+
+    // 检查用户名是否已存在
+    for (int i = 0; i < num_users; i++) {
+        if (strcmp(users[i].name, name) == 0) {
+            printf("用户名已存在，无法添加新用户！\n");
+            return;
+        }
+    }
+
+    // 添加新用户
+    User user;
+    strcpy(user.name, name);
+    strcpy(user.password, password);
+    user.access_level = access_level;
+    users[num_users] = user;
+    num_users++;
+    printf("用户添加成功！\n");
+}
+
+// 删除用户
+void delete_user(char *name) {
+    // 查找要删除的用户
+    int index = -1;
+    for (int i = 0; i < num_users; i++) {
+        if (strcmp(users[i].name, name) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    // 删除用户
+    if (index != -1) {
+        for (int i = index; i < num_users - 1; i++) {
+            users[i] = users[i + 1];
+        }
+        num_users--;
+        printf("用户删除成功！\n");
+    } else {
+        printf("用户不存在，无法删除用户！\n");
+    }
+}
+
+// 验证用户名和密码
+int authenticate(char *name, char *password) {
+    for (int i = 0; i < num_users; i++) {
+        if (strcmp(users[i].name, name) == 0 && strcmp(users[i].password, password) == 0) {
+            return users[i].access_level;
+        }
+    }
+    return -1;
+}
+
+// 主函数
+int main() {
+    // 添加默认管理员账户
+    add_user("admin", ADMIN_PASSWORD, 2);
+
+    // 循环接收用户输入
+    while (1) {
+        // 打印提示信息
+        printf("\n请输入用户名和密码，用空格分隔：");
+
+        // 读取用户输入
+        char name[20], password[20];
+        scanf("%s %s", name, password);
+
+        // 验证用户名和密码
+        int access_level = authenticate(name, password);
+
+        if (access_level == -1) {
+            printf("用户名或密码错误，请重试！\n");
+        } else if (access_level == 0) {
+            printf("访客权限不足，无法进入！\n");
+        } else if (access_level == 1) {
+            printf("欢迎员工 %s 进入
